@@ -29,11 +29,20 @@ export function TeamForm({ team, onSubmit, onCancel, isLoading }: TeamFormProps)
       return
     }
 
-    onSubmit({ 
-      name: name.trim(), 
-      logo: logo.trim() || undefined, 
-      players: []
-    })
+    // When editing a team, only send name and logo data to preserve existing players
+    if (team) {
+      onSubmit({ 
+        name: name.trim(), 
+        logo: logo.trim() || undefined
+      })
+    } else {
+      // When creating a new team, include empty players array
+      onSubmit({ 
+        name: name.trim(), 
+        logo: logo.trim() || undefined, 
+        players: []
+      })
+    }
   }
 
   return (

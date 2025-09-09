@@ -6,7 +6,7 @@ import * as bcrypt from 'bcryptjs'
 // Simple auth for demo purposes - in production, use proper authentication
 export const ADMIN_CREDENTIALS = {
   username: "admin",
-  password: "fanfarroes2024",
+  password: "fanfarroes2025",
 }
 
 export async function createAdmin(username: string, password: string) {

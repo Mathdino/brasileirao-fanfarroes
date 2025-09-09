@@ -82,11 +82,6 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
               {isLoading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-            <p className="text-xs text-blue-800">
-              <strong>Demo:</strong> usuário: admin, senha: fanfarroes2024
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>

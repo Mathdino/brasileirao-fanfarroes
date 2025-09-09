@@ -102,7 +102,7 @@ O aplicativo estará disponível em `http://localhost:3000`
 ### Acesso administrativo
 - URL: `/administrador`
 - Usuário: `admin`
-- Senha: `fanfarroes2024`
+- Senha: `escolha sua senha`
 
 ### Funcionalidades admin:
 - Cadastrar/editar times
