@@ -77,8 +77,13 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Delete match and all related data (goals, cards, statistics)
+    // This will automatically update team rankings and player statistics
+    // since they are calculated dynamically from remaining matches
     await deleteMatch(params.id)
-    return NextResponse.json({ message: 'Match deleted successfully' })
+    return NextResponse.json({ 
+      message: 'Match and all related data deleted successfully. Rankings and statistics have been updated.' 
+    })
   } catch (error) {
     console.error('Error deleting match:', error)
     return NextResponse.json({ error: 'Failed to delete match' }, { status: 500 })

@@ -130,9 +130,26 @@ export async function updateMatchResult(id: string, data: UpdateMatchData): Prom
 }
 
 export async function deleteMatch(id: string): Promise<void> {
+  // Delete all related data explicitly to ensure complete cleanup
+  // Note: Cascade deletes are also configured in the schema as backup
+  
+  // Delete all goals related to this match
+  await prisma.goal.deleteMany({
+    where: { matchId: id }
+  })
+  
+  // Delete all cards related to this match
+  await prisma.card.deleteMany({
+    where: { matchId: id }
+  })
+  
+  // Finally delete the match itself
   await prisma.match.delete({
     where: { id }
   })
+  
+  // Note: Team statistics and rankings will be automatically recalculated
+  // on next page load since they are computed from remaining matches
 }
 
 export async function getUpcomingMatches(): Promise<MatchWithTeams[]> {

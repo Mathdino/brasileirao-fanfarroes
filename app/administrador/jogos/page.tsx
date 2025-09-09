@@ -232,7 +232,7 @@ export default function MatchesManagementPage() {
   }
 
   const handleDeleteMatch = async (match: any) => {
-    if (confirm(`Tem certeza que deseja excluir este jogo? Todos os gols também serão removidos.`)) {
+    if (confirm(`Tem certeza que deseja excluir este jogo?\n\n⚠️ ATENÇÃO: Esta ação irá remover PERMANENTEMENTE:\n• O jogo e seu resultado\n• Todos os gols e assistências\n• Todos os cartões aplicados\n• Os pontos serão recalculados na classificação\n• Todas as estatísticas dos rankings serão atualizadas\n\nEsta ação não pode ser desfeita!`)) {
       try {
         const response = await fetch(`/api/matches/${match.id}`, {
           method: 'DELETE'
@@ -247,8 +247,8 @@ export default function MatchesManagementPage() {
         if (selectedMatch?.id === match.id) {
           setSelectedMatch(null)
         }
-        setMessage("Jogo excluído com sucesso!")
-        setTimeout(() => setMessage(""), 3000)
+        setMessage("Jogo excluído com sucesso! Todos os gols, cartões e pontos foram removidos. A classificação e rankings foram atualizados.")
+        setTimeout(() => setMessage(""), 5000)
       } catch (error) {
         console.error('Error deleting match:', error)
         setMessage(`Erro ao excluir jogo: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
