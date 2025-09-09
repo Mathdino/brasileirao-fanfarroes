@@ -455,7 +455,7 @@ export default function MatchesManagementPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <AdminHeader onLogout={handleLogout} />
-        <main className="p-4">
+        <main className="p-2 sm:p-4">
           <div className="mb-4">
             <Button
               variant="ghost"
@@ -490,7 +490,7 @@ export default function MatchesManagementPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <AdminHeader onLogout={handleLogout} />
-        <main className="p-4">
+        <main className="p-2 sm:p-4">
           <div className="mb-4">
             <Button
               variant="ghost"
@@ -526,7 +526,7 @@ export default function MatchesManagementPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <AdminHeader onLogout={handleLogout} />
-        <main className="p-4">
+        <main className="p-2 sm:p-4">
           <div className="mb-4">
             <Button
               variant="ghost"
@@ -562,7 +562,7 @@ export default function MatchesManagementPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         <AdminHeader onLogout={handleLogout} />
-        <main className="p-4">
+        <main className="p-2 sm:p-4">
           <div className="mb-4">
             <Button variant="ghost" onClick={() => setSelectedMatch(null)}>
               <ArrowLeft className="h-4 w-4 mr-1" />
@@ -578,62 +578,73 @@ export default function MatchesManagementPage() {
 
           <Card className="mb-4">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2 mb-2">
-                    <div className="flex items-center gap-3">
-                      <Image
-                        src={homeTeam.logo || "/placeholder.svg"}
-                        alt={homeTeam.name}
-                        width={32}
-                        height={32}
-                        className="rounded"
-                      />
-                      <span>{homeTeam.name}</span>
-                      <span className="text-2xl font-bold">{selectedMatch.homeScore}</span>
-                      <span className="text-muted-foreground">x</span>
-                      <span className="text-2xl font-bold">{selectedMatch.awayScore}</span>
-                      <span>{awayTeam.name}</span>
-                      <Image
-                        src={awayTeam.logo || "/placeholder.svg"}
-                        alt={awayTeam.name}
-                        width={32}
-                        height={32}
-                        className="rounded"
-                      />
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <Image
+                          src={homeTeam.logo || "/placeholder.svg"}
+                          alt={homeTeam.name}
+                          width={32}
+                          height={32}
+                          className="rounded flex-shrink-0"
+                        />
+                        <span className="text-sm sm:text-base truncate">{homeTeam.name}</span>
+                      </div>
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <span className="text-xl sm:text-2xl font-bold">{selectedMatch.homeScore}</span>
+                        <span className="text-muted-foreground text-sm sm:text-base">x</span>
+                        <span className="text-xl sm:text-2xl font-bold">{selectedMatch.awayScore}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm sm:text-base truncate">{awayTeam.name}</span>
+                        <Image
+                          src={awayTeam.logo || "/placeholder.svg"}
+                          alt={awayTeam.name}
+                          width={32}
+                          height={32}
+                          className="rounded flex-shrink-0"
+                        />
+                      </div>
                     </div>
                   </CardTitle>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      {formatDate(selectedMatch.matchDate)}
+                      <Calendar className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">{formatDate(selectedMatch.matchDate)}</span>
                     </div>
-                    {getStatusBadge(selectedMatch)}
+                    <div className="flex items-center gap-1">
+                      {getStatusBadge(selectedMatch)}
+                    </div>
                   </div>
                 </div>
-                <Button
-                  onClick={() => {
-                    setEditingMatch(selectedMatch)
-                    setShowMatchForm(true)
-                  }}
-                  variant="outline"
-                  size="sm"
-                >
-                  <Edit className="h-4 w-4 mr-1" />
-                  Editar Jogo
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 mt-2 sm:mt-0">
+                  <Button
+                    onClick={() => {
+                      setEditingMatch(selectedMatch)
+                      setShowMatchForm(true)
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto"
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Editar Jogo
+                  </Button>
+                </div>
               </div>
             </CardHeader>
           </Card>
 
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                 <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
+                  <Target className="h-5 w-5 flex-shrink-0" />
                   Gols ({matchGoals.length})
                 </CardTitle>
-                <Button onClick={() => setShowGoalForm(true)} className="bg-[#007fcc] hover:bg-[#006bb3]" size="sm">
+                <Button onClick={() => setShowGoalForm(true)} className="bg-[#007fcc] hover:bg-[#006bb3] w-full sm:w-auto" size="sm">
                   <Plus className="h-4 w-4 mr-1" />
                   Registrar Gol
                 </Button>
@@ -652,28 +663,28 @@ export default function MatchesManagementPage() {
                       const team = teams.find((t) => t.id === goal.teamId)
 
                       return (
-                        <div key={goal.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-2">
+                        <div key={goal.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-shrink-0">
                               <Image
                                 src={team?.logo || ""}
                                 alt={team?.name || ""}
                                 width={24}
                                 height={24}
-                                className="rounded"
+                                className="rounded flex-shrink-0"
                               />
-                              <Badge variant="outline" className="text-xs">
+                              <Badge variant="outline" className="text-xs flex-shrink-0">
                                 {goal.minute}'
                               </Badge>
                             </div>
-                            <div>
-                              <p className="font-medium">{scorer?.name}</p>
+                            <div className="min-w-0">
+                              <p className="font-medium truncate">{scorer?.name}</p>
                               {assister && (
-                                <p className="text-sm text-muted-foreground">Assistência: {assister.name}</p>
+                                <p className="text-sm text-muted-foreground truncate">Assistência: {assister.name}</p>
                               )}
                             </div>
                           </div>
-                          <div className="flex gap-1">
+                          <div className="flex gap-1 self-end sm:self-center">
                             <Button
                               onClick={() => {
                                 setEditingGoal(goal)
@@ -704,12 +715,12 @@ export default function MatchesManagementPage() {
           {/* Cards Section */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                 <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
+                  <CreditCard className="h-5 w-5 flex-shrink-0" />
                   Cartões ({matchCards.length})
                 </CardTitle>
-                <Button onClick={() => setShowCardForm(true)} className="bg-[#007fcc] hover:bg-[#006bb3]" size="sm">
+                <Button onClick={() => setShowCardForm(true)} className="bg-[#007fcc] hover:bg-[#006bb3] w-full sm:w-auto" size="sm">
                   <Plus className="h-4 w-4 mr-1" />
                   Aplicar Cartão
                 </Button>
@@ -727,35 +738,35 @@ export default function MatchesManagementPage() {
                       const team = teams.find((t) => t.id === card.teamId)
 
                       return (
-                        <div key={card.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-2">
+                        <div key={card.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-shrink-0">
                               <Image
                                 src={team?.logo || ""}
                                 alt={team?.name || ""}
                                 width={24}
                                 height={24}
-                                className="rounded"
+                                className="rounded flex-shrink-0"
                               />
                               {card.minute && (
-                                <Badge variant="outline" className="text-xs">
+                                <Badge variant="outline" className="text-xs flex-shrink-0">
                                   {card.minute}'
                                 </Badge>
                               )}
                               {card.type === "YELLOW" ? (
-                                <Square className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                                <Square className="w-4 h-4 text-yellow-500 fill-yellow-500 flex-shrink-0" />
                               ) : (
-                                <SquareX className="w-4 h-4 text-red-500 fill-red-500" />
+                                <SquareX className="w-4 h-4 text-red-500 fill-red-500 flex-shrink-0" />
                               )}
                             </div>
-                            <div>
-                              <p className="font-medium">{player?.name}</p>
-                              <p className="text-sm text-muted-foreground">
+                            <div className="min-w-0">
+                              <p className="font-medium truncate">{player?.name}</p>
+                              <p className="text-sm text-muted-foreground truncate">
                                 Cartão {card.type === "YELLOW" ? "Amarelo" : "Vermelho"}
                               </p>
                             </div>
                           </div>
-                          <div className="flex gap-1">
+                          <div className="flex gap-1 self-end sm:self-center">
                             <Button
                               onClick={() => {
                                 setEditingCard(card)
@@ -791,7 +802,7 @@ export default function MatchesManagementPage() {
     <div className="min-h-screen bg-gray-50">
       <AdminHeader onLogout={handleLogout} />
 
-      <main className="p-4">
+      <main className="p-2 sm:p-4">
         <div className="mb-4">
           <Link href="/administrador">
             <Button variant="ghost">
@@ -809,12 +820,12 @@ export default function MatchesManagementPage() {
 
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
               <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
+                <Calendar className="h-5 w-5 flex-shrink-0" />
                 Gerenciar Jogos ({matches.length})
               </CardTitle>
-              <Button onClick={() => setShowMatchForm(true)} className="bg-[#007fcc] hover:bg-[#006bb3]">
+              <Button onClick={() => setShowMatchForm(true)} className="bg-[#007fcc] hover:bg-[#006bb3] w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-1" />
                 Agendar Jogo
               </Button>
@@ -831,71 +842,80 @@ export default function MatchesManagementPage() {
                   const goals = match.goals || []
 
                   return (
-                    <div key={match.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-3">
-                            <Image
-                              src={homeTeam.logo || "/placeholder.svg"}
-                              alt={homeTeam.name}
-                              width={32}
-                              height={32}
-                              className="rounded"
-                            />
-                            <span className="font-medium">{homeTeam.name}</span>
-                            <span className="text-xl font-bold">{match.homeScore}</span>
-                            <span className="text-muted-foreground">x</span>
-                            <span className="text-xl font-bold">{match.awayScore}</span>
-                            <span className="font-medium">{awayTeam.name}</span>
-                            <Image
-                              src={awayTeam.logo || "/placeholder.svg"}
-                              alt={awayTeam.name}
-                              width={32}
-                              height={32}
-                              className="rounded"
-                            />
+                    <div key={match.id} className="p-3 sm:p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="flex flex-col gap-3">
+                        {/* Match Header */}
+                        <div className="flex flex-col sm:flex-row items-center sm:items-center justify-between gap-3">
+                          <div className="flex items-center gap-2 sm:gap-3 flex-wrap min-w-0">
+                            <div className="flex items-center gap-2">
+                              <Image
+                                src={homeTeam.logo || "/placeholder.svg"}
+                                alt={homeTeam.name}
+                                width={24}
+                                height={24}
+                                className="rounded flex-shrink-0"
+                              />
+                              <span className="font-medium text-sm sm:text-base truncate">{homeTeam.name}</span>
+                            </div>
+                            <div className="flex items-center gap-1 sm:gap-2">
+                              <span className="text-lg sm:text-xl font-bold">{match.homeScore}</span>
+                              <span className="text-muted-foreground text-sm">x</span>
+                              <span className="text-lg sm:text-xl font-bold">{match.awayScore}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-sm sm:text-base truncate">{awayTeam.name}</span>
+                              <Image
+                                src={awayTeam.logo || "/placeholder.svg"}
+                                alt={awayTeam.name}
+                                width={24}
+                                height={24}
+                                className="rounded flex-shrink-0"
+                              />
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 sm:gap-2 self-end sm:self-center">
+                            {getStatusBadge(match)}
+                            <Button
+                              onClick={() => {
+                                setEditingMatch(match)
+                                setShowMatchForm(true)
+                              }}
+                              variant="ghost"
+                              size="sm"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              onClick={() => handleDeleteMatch(match)}
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {getStatusBadge(match)}
-                          <Button
-                            onClick={() => {
-                              setEditingMatch(match)
-                              setShowMatchForm(true)
-                            }}
-                            variant="ghost"
-                            size="sm"
-                          >
-                            <Edit className="h-4 w-4" />
+                        
+                        {/* Match Details */}
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm text-muted-foreground">
+                          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-4 w-4 flex-shrink-0" />
+                              <span className="text-xs sm:text-sm">{formatDate(match.matchDate)}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Target className="h-4 w-4 flex-shrink-0" />
+                              <span className="text-xs sm:text-sm">{goals.length} gols</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <CreditCard className="h-4 w-4 flex-shrink-0" />
+                              <span className="text-xs sm:text-sm">{(match.cards || []).length} cartões</span>
+                            </div>
+                          </div>
+                          <Button onClick={() => setSelectedMatch(match)} variant="outline" size="sm" className="w-full sm:w-auto">
+                            Gerenciar Jogo
                           </Button>
-                          <Button
-                            onClick={() => handleDeleteMatch(match)}
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
                         </div>
-                      </div>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {formatDate(match.matchDate)}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Target className="h-4 w-4" />
-                            {goals.length} gols
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <CreditCard className="h-4 w-4" />
-                            {(match.cards || []).length} cartões
-                          </div>
-                        </div>
-                        <Button onClick={() => setSelectedMatch(match)} variant="outline" size="sm">
-                          Gerenciar Jogo
-                        </Button>
                       </div>
                     </div>
                   )
