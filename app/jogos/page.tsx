@@ -19,12 +19,15 @@ export default function MatchesPage() {
         const matches: MatchWithTeams[] = await response.json()
         setAllMatches(matches)
         
-        // Filter matches client-side
+        // Filter and sort matches client-side
         const now = new Date()
-        const upcoming = matches.filter(match => 
-          !match.finished && new Date(match.matchDate) >= now
-        )
-        const completed = matches.filter(match => match.finished)
+        const upcoming = matches
+          .filter(match => !match.finished && new Date(match.matchDate) >= now)
+          .sort((a, b) => new Date(a.matchDate).getTime() - new Date(b.matchDate).getTime())
+        
+        const completed = matches
+          .filter(match => match.finished)
+          .sort((a, b) => new Date(b.matchDate).getTime() - new Date(a.matchDate).getTime())
         
         setUpcomingMatches(upcoming)
         setCompletedMatches(completed)
@@ -84,9 +87,9 @@ export default function MatchesPage() {
     )
   }
 
-  const liveMatches = allMatches.filter(match => 
-    !match.finished && new Date(match.matchDate) <= new Date()
-  )
+  const liveMatches = allMatches
+    .filter(match => !match.finished && new Date(match.matchDate) <= new Date())
+    .sort((a, b) => new Date(a.matchDate).getTime() - new Date(b.matchDate).getTime())
 
   if (isLoading) {
     return (
