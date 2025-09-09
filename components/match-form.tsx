@@ -29,8 +29,14 @@ export function MatchForm({ match, teams, onSubmit, onCancel, isLoading }: Match
   const [awayTeamId, setAwayTeamId] = useState(match?.awayTeamId || "")
   const [homeScore, setHomeScore] = useState(match?.homeScore?.toString() || "0")
   const [awayScore, setAwayScore] = useState(match?.awayScore?.toString() || "0")
+  // Helper function to convert date to datetime-local format in local timezone
+  const formatDateForInput = (date: Date) => {
+    const localDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+    return localDate.toISOString().slice(0, 16)
+  }
+  
   const [matchDate, setMatchDate] = useState(
-    match?.matchDate ? new Date(match.matchDate).toISOString().slice(0, 16) : "",
+    match?.matchDate ? formatDateForInput(new Date(match.matchDate)) : "",
   )
   // Convert finished boolean to status string
   const getStatusFromMatch = (match: any) => {
@@ -62,12 +68,22 @@ export function MatchForm({ match, teams, onSubmit, onCancel, isLoading }: Match
       return
     }
 
+    // Fix timezone issue by properly parsing local datetime
+    // The datetime-local input returns format: "YYYY-MM-DDTHH:MM"
+    // We need to parse this as local time, not UTC
+    const [datePart, timePart] = matchDate.split('T')
+    const [year, month, day] = datePart.split('-').map(Number)
+    const [hours, minutes] = timePart.split(':').map(Number)
+    
+    // Create date in local timezone
+    const localDate = new Date(year, month - 1, day, hours, minutes)
+    
     const matchData = {
       homeTeamId,
       awayTeamId,
       homeScore: Number.parseInt(homeScore) || 0,
       awayScore: Number.parseInt(awayScore) || 0,
-      matchDate: new Date(matchDate),
+      matchDate: localDate,
       status,
     }
 

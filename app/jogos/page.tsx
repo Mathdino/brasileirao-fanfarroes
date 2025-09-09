@@ -1,21 +1,46 @@
+"use client"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { getMatches, getUpcomingMatches, getFinishedMatches } from "@/lib/match-management"
 import { Calendar, Clock, MapPin } from "lucide-react"
 import Image from "next/image"
+import type { MatchWithTeams } from "@/lib/types"
 
-export default async function MatchesPage() {
-  let allMatches = []
-  let upcomingMatches = []
-  let completedMatches = []
+export default function MatchesPage() {
+  const [allMatches, setAllMatches] = useState<MatchWithTeams[]>([])
+  const [upcomingMatches, setUpcomingMatches] = useState<MatchWithTeams[]>([])
+  const [completedMatches, setCompletedMatches] = useState<MatchWithTeams[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   
-  try {
-    allMatches = await getMatches()
-    upcomingMatches = await getUpcomingMatches()
-    completedMatches = await getFinishedMatches()
-  } catch (error) {
-    console.error('Error fetching matches:', error)
+  const loadMatches = async () => {
+    try {
+      const response = await fetch('/api/matches')
+      if (response.ok) {
+        const matches: MatchWithTeams[] = await response.json()
+        setAllMatches(matches)
+        
+        // Filter matches client-side
+        const now = new Date()
+        const upcoming = matches.filter(match => 
+          !match.finished && new Date(match.matchDate) >= now
+        )
+        const completed = matches.filter(match => match.finished)
+        
+        setUpcomingMatches(upcoming)
+        setCompletedMatches(completed)
+      } else {
+        console.error('Failed to fetch matches:', response.statusText)
+      }
+    } catch (error) {
+      console.error('Error fetching matches:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
+  
+  useEffect(() => {
+    loadMatches()
+  }, [])
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("pt-BR", {
@@ -62,6 +87,17 @@ export default async function MatchesPage() {
   const liveMatches = allMatches.filter(match => 
     !match.finished && new Date(match.matchDate) <= new Date()
   )
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#007fcc] mx-auto"></div>
+          <p className="mt-2 text-sm text-muted-foreground">Carregando jogos...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
