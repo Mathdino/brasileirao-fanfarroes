@@ -56,7 +56,7 @@ export default async function HomePage() {
             <CardTitle className="text-lg">Tabela de Classificação</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto scrollbar-hide">
               <table className="w-full text-sm">
                 <thead className="bg-gray-100">
                   <tr>
