@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  logo        String?  // URL da imagem do escudo
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relacionamentos
+  players     Player[]
+  homeMatches Match[]  @relation("HomeTeam")
+  awayMatches Match[]  @relation("AwayTeam")
+  goals       Goal[]
+  cards       Card[]
+  
+  @@map("teams")
+}
+
+model Player {
+  id        String   @id @default(cuid())
+  name      String
+  position  String   // Goleiro, Zagueiro, Meio-campo, Atacante
+  number    Int?
+  teamId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relacionamentos
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  goals     Goal[]   @relation("Scorer")
+  assists   Goal[]   @relation("Assistant")
+  cards     Card[]
+  
+  @@unique([teamId, number])
+  @@map("players")
+}
+
+model Match {
+  id          String    @id @default(cuid())
+  homeTeamId  String
+  awayTeamId  String
+  homeScore   Int       @default(0)
+  awayScore   Int       @default(0)
+  matchDate   DateTime
+  finished    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relacionamentos
+  homeTeam    Team      @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam    Team      @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  goals       Goal[]
+  cards       Card[]
+  
+  @@map("matches")
+}
+
+model Goal {
+  id          String   @id @default(cuid())
+  matchId     String
+  scorerId    String
+  assistantId String?
+  teamId      String
+  minute      Int?
+  createdAt   DateTime @default(now())
+  
+  // Relacionamentos
+  match       Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  scorer      Player   @relation("Scorer", fields: [scorerId], references: [id])
+  assistant   Player?  @relation("Assistant", fields: [assistantId], references: [id])
+  team        Team     @relation(fields: [teamId], references: [id])
+  
+  @@map("goals")
+}
+
+model Card {
+  id        String   @id @default(cuid())
+  matchId   String
+  playerId  String
+  teamId    String
+  type      String   // "YELLOW" ou "RED"
+  minute    Int?
+  createdAt DateTime @default(now())
+  
+  // Relacionamentos
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player    Player   @relation(fields: [playerId], references: [id])
+  team      Team     @relation(fields: [teamId], references: [id])
+  
+  @@map("cards")
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String   // Hash da senha
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("admins")
+}
