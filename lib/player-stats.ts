@@ -43,6 +43,7 @@ export async function getTopScorers(limit: number = 10): Promise<PlayerGoalStats
       // Contar apenas gols de jogos que ainda existem no banco de dados
       goals: player.goals.filter((goal: any) => goal.match !== null).length
     }))
+    .filter(stat => stat.goals > 0) // Filtrar apenas jogadores que marcaram gols
     .sort((a: PlayerGoalStats, b: PlayerGoalStats) => b.goals - a.goals)
     .slice(0, limit)
   
@@ -70,6 +71,7 @@ export async function getTopAssists(limit: number = 10): Promise<PlayerAssistSta
       // Contar apenas assistências de jogos que ainda existem no banco de dados
       assists: player.assists.filter((assist: any) => assist.match !== null).length
     }))
+    .filter(stat => stat.assists > 0) // Filtrar apenas jogadores que deram assistências
     .sort((a: PlayerAssistStats, b: PlayerAssistStats) => b.assists - a.assists)
     .slice(0, limit)
   
@@ -223,6 +225,7 @@ export async function getPlayerCardStats(limit: number = 10): Promise<PlayerCard
         totalCards
       }
     })
+    .filter(stat => stat.totalCards > 0) // Filtrar apenas jogadores que receberam cartões
     .sort((a: PlayerCardStats, b: PlayerCardStats) => {
       // Primeiro ordenar por cartões vermelhos, depois amarelos, depois total
       if (b.redCards !== a.redCards) return b.redCards - a.redCards
