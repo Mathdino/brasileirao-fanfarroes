@@ -23,20 +23,25 @@ type PlayerWithTeamAndAssists = Player & {
 }
 
 export async function getTopScorers(limit: number = 10): Promise<PlayerGoalStats[]> {
-  // Buscar todos os jogadores com seus gols
+  // Buscar todos os jogadores com seus gols e incluir informações da partida para verificar se o jogo existe
   const playersWithGoals = await prisma.player.findMany({
     include: {
       team: true,
-      goals: true
+      goals: {
+        include: {
+          match: true
+        }
+      }
     }
   })
 
-  // Mapear para o formato de estatísticas e calcular o total de gols por jogador
+  // Mapear para o formato de estatísticas e calcular o total de gols por jogador, considerando apenas jogos existentes
   const stats = playersWithGoals
     .map((player: any): PlayerGoalStats => ({
       player,
       team: player.team,
-      goals: player.goals.length
+      // Contar apenas gols de jogos que ainda existem no banco de dados
+      goals: player.goals.filter((goal: any) => goal.match !== null).length
     }))
     .sort((a: PlayerGoalStats, b: PlayerGoalStats) => b.goals - a.goals)
     .slice(0, limit)
@@ -45,20 +50,25 @@ export async function getTopScorers(limit: number = 10): Promise<PlayerGoalStats
 }
 
 export async function getTopAssists(limit: number = 10): Promise<PlayerAssistStats[]> {
-  // Buscar todos os jogadores com suas assistências
+  // Buscar todos os jogadores com suas assistências e incluir informações da partida para verificar se o jogo existe
   const playersWithAssists = await prisma.player.findMany({
     include: {
       team: true,
-      assists: true
+      assists: {
+        include: {
+          match: true
+        }
+      }
     }
   })
 
-  // Mapear para o formato de estatísticas e calcular o total de assistências por jogador
+  // Mapear para o formato de estatísticas e calcular o total de assistências por jogador, considerando apenas jogos existentes
   const stats = playersWithAssists
     .map((player: any): PlayerAssistStats => ({
       player,
       team: player.team,
-      assists: player.assists.length
+      // Contar apenas assistências de jogos que ainda existem no banco de dados
+      assists: player.assists.filter((assist: any) => assist.match !== null).length
     }))
     .sort((a: PlayerAssistStats, b: PlayerAssistStats) => b.assists - a.assists)
     .slice(0, limit)
@@ -80,7 +90,7 @@ export async function getTopGoalkeepers(limit: number = 10): Promise<GoalkeeperS
   const allGoalkeeperStats: GoalkeeperStats[] = []
 
   for (const goalkeeper of goalkeepers) {
-    // Buscar todas as partidas do time do goleiro
+    // Buscar todas as partidas do time do goleiro que ainda existem no banco de dados
     const homeMatches = await prisma.match.findMany({
       where: {
         homeTeamId: goalkeeper.teamId
@@ -184,19 +194,25 @@ export async function getTopGoalkeepers(limit: number = 10): Promise<GoalkeeperS
 }
 
 export async function getPlayerCardStats(limit: number = 10): Promise<PlayerCardStats[]> {
-  // Buscar todos os jogadores com seus cartões
+  // Buscar todos os jogadores com seus cartões e incluir informações da partida para verificar se o jogo existe
   const playersWithCards = await prisma.player.findMany({
     include: {
       team: true,
-      cards: true
+      cards: {
+        include: {
+          match: true
+        }
+      }
     }
   })
 
-  // Mapear para o formato de estatísticas e calcular o total de cartões por jogador
+  // Mapear para o formato de estatísticas e calcular o total de cartões por jogador, considerando apenas jogos existentes
   const stats = playersWithCards
     .map((player: any): PlayerCardStats => {
-      const yellowCards = player.cards.filter((card: any) => card.type === 'YELLOW').length
-      const redCards = player.cards.filter((card: any) => card.type === 'RED').length
+      // Filtrar apenas cartões de jogos que ainda existem no banco de dados
+      const validCards = player.cards.filter((card: any) => card.match !== null)
+      const yellowCards = validCards.filter((card: any) => card.type === 'YELLOW').length
+      const redCards = validCards.filter((card: any) => card.type === 'RED').length
       const totalCards = yellowCards + redCards
       
       return {
