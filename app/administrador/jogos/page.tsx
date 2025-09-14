@@ -837,8 +837,20 @@ export default function MatchesManagementPage() {
             ) : (
               <div className="space-y-3">
                 {matches.map((match) => {
-                  const homeTeam = teams.find((t) => t.id === match.homeTeamId)!
-                  const awayTeam = teams.find((t) => t.id === match.awayTeamId)!
+                  const homeTeam = teams.find((t) => t.id === match.homeTeamId) || { 
+                    id: 'not-found', 
+                    name: 'Time não encontrado', 
+                    logo: '/placeholder.svg',
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                  }
+                  const awayTeam = teams.find((t) => t.id === match.awayTeamId) || { 
+                    id: 'not-found', 
+                    name: 'Time não encontrado', 
+                    logo: '/placeholder.svg',
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                  }
                   const goals = match.goals || []
 
                   return (
