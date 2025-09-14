@@ -23,28 +23,20 @@ type PlayerWithTeamAndAssists = Player & {
 }
 
 export async function getTopScorers(limit: number = 10): Promise<PlayerGoalStats[]> {
-  // Buscar jogadores com contagem de gols
+  // Buscar todos os jogadores com seus gols
   const playersWithGoals = await prisma.player.findMany({
     include: {
       team: true,
-      _count: {
-        select: { goals: true }
-      }
-    },
-    orderBy: {
-      goals: {
-        _count: 'desc'
-      }
-    },
-    take: limit * 2 // Buscar mais do que o necessário para garantir que tenhamos suficientes após filtrar
+      goals: true
+    }
   })
 
-  // Mapear para o formato de estatísticas
+  // Mapear para o formato de estatísticas e calcular o total de gols por jogador
   const stats = playersWithGoals
-    .map((player: PlayerWithTeamAndGoals): PlayerGoalStats => ({
+    .map((player: any): PlayerGoalStats => ({
       player,
       team: player.team,
-      goals: player._count.goals
+      goals: player.goals.length
     }))
     .sort((a: PlayerGoalStats, b: PlayerGoalStats) => b.goals - a.goals)
     .slice(0, limit)
@@ -53,28 +45,20 @@ export async function getTopScorers(limit: number = 10): Promise<PlayerGoalStats
 }
 
 export async function getTopAssists(limit: number = 10): Promise<PlayerAssistStats[]> {
-  // Buscar jogadores com contagem de assistências
+  // Buscar todos os jogadores com suas assistências
   const playersWithAssists = await prisma.player.findMany({
     include: {
       team: true,
-      _count: {
-        select: { assists: true }
-      }
-    },
-    orderBy: {
-      assists: {
-        _count: 'desc'
-      }
-    },
-    take: limit * 2 // Buscar mais do que o necessário para garantir que tenhamos suficientes após filtrar
+      assists: true
+    }
   })
 
-  // Mapear para o formato de estatísticas
+  // Mapear para o formato de estatísticas e calcular o total de assistências por jogador
   const stats = playersWithAssists
-    .map((player: PlayerWithTeamAndAssists): PlayerAssistStats => ({
+    .map((player: any): PlayerAssistStats => ({
       player,
       team: player.team,
-      assists: player._count.assists
+      assists: player.assists.length
     }))
     .sort((a: PlayerAssistStats, b: PlayerAssistStats) => b.assists - a.assists)
     .slice(0, limit)
@@ -83,7 +67,7 @@ export async function getTopAssists(limit: number = 10): Promise<PlayerAssistSta
 }
 
 export async function getTopGoalkeepers(limit: number = 10): Promise<GoalkeeperStats[]> {
-  // Buscar goleiros (assumindo que a posição seja "Goleiro")
+  // Buscar todos os goleiros com seus times
   const goalkeepers = await prisma.player.findMany({
     where: {
       position: 'Goleiro'
@@ -96,62 +80,43 @@ export async function getTopGoalkeepers(limit: number = 10): Promise<GoalkeeperS
   const allGoalkeeperStats: GoalkeeperStats[] = []
 
   for (const goalkeeper of goalkeepers) {
-    // Contar partidas jogadas como mandante ou visitante
-    const homeMatches = await prisma.match.count({
+    // Buscar todas as partidas do time do goleiro
+    const homeMatches = await prisma.match.findMany({
       where: {
-        homeTeamId: goalkeeper.teamId,
-        finished: true
+        homeTeamId: goalkeeper.teamId
       }
     })
 
-    const awayMatches = await prisma.match.count({
+    const awayMatches = await prisma.match.findMany({
       where: {
-        awayTeamId: goalkeeper.teamId,
-        finished: true
+        awayTeamId: goalkeeper.teamId
       }
     })
 
-    const matchesPlayed = homeMatches + awayMatches
+    // Contar partidas finalizadas
+    const finishedHomeMatches = homeMatches.filter(match => match.finished).length
+    const finishedAwayMatches = awayMatches.filter(match => match.finished).length
+    const matchesPlayed = finishedHomeMatches + finishedAwayMatches
 
-    // Somar gols sofridos
-    const homeGoalsAgainst = await prisma.match.aggregate({
-      where: {
-        homeTeamId: goalkeeper.teamId,
-        finished: true
-      },
-      _sum: {
-        awayScore: true
-      }
-    })
+    // Calcular gols sofridos
+    const homeGoalsAgainst = homeMatches
+      .filter(match => match.finished)
+      .reduce((sum, match) => sum + (match.awayScore || 0), 0)
 
-    const awayGoalsAgainst = await prisma.match.aggregate({
-      where: {
-        awayTeamId: goalkeeper.teamId,
-        finished: true
-      },
-      _sum: {
-        homeScore: true
-      }
-    })
+    const awayGoalsAgainst = awayMatches
+      .filter(match => match.finished)
+      .reduce((sum, match) => sum + (match.homeScore || 0), 0)
 
-    const goalsAgainst = (homeGoalsAgainst._sum.awayScore || 0) + (awayGoalsAgainst._sum.homeScore || 0)
+    const goalsAgainst = homeGoalsAgainst + awayGoalsAgainst
 
     // Contar jogos sem sofrer gols (clean sheets)
-    const homeCleanSheets = await prisma.match.count({
-      where: {
-        homeTeamId: goalkeeper.teamId,
-        finished: true,
-        awayScore: 0
-      }
-    })
+    const homeCleanSheets = homeMatches
+      .filter(match => match.finished && match.awayScore === 0)
+      .length
 
-    const awayCleanSheets = await prisma.match.count({
-      where: {
-        awayTeamId: goalkeeper.teamId,
-        finished: true,
-        homeScore: 0
-      }
-    })
+    const awayCleanSheets = awayMatches
+      .filter(match => match.finished && match.homeScore === 0)
+      .length
 
     const cleanSheets = homeCleanSheets + awayCleanSheets
 
@@ -219,24 +184,15 @@ export async function getTopGoalkeepers(limit: number = 10): Promise<GoalkeeperS
 }
 
 export async function getPlayerCardStats(limit: number = 10): Promise<PlayerCardStats[]> {
+  // Buscar todos os jogadores com seus cartões
   const playersWithCards = await prisma.player.findMany({
     include: {
       team: true,
-      cards: {
-        select: {
-          type: true
-        }
-      }
-    },
-    orderBy: {
-      cards: {
-        _count: 'desc'
-      }
-    },
-    take: limit * 2 // Buscar mais do que o necessário para garantir que tenhamos suficientes após filtrar
+      cards: true
+    }
   })
 
-  // Mapear para o formato de estatísticas
+  // Mapear para o formato de estatísticas e calcular o total de cartões por jogador
   const stats = playersWithCards
     .map((player: any): PlayerCardStats => {
       const yellowCards = player.cards.filter((card: any) => card.type === 'YELLOW').length
