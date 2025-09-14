@@ -23,45 +23,63 @@ type PlayerWithTeamAndAssists = Player & {
 }
 
 export async function getTopScorers(limit: number = 10): Promise<PlayerGoalStats[]> {
+  // Buscar jogadores com contagem de gols
   const playersWithGoals = await prisma.player.findMany({
     include: {
       team: true,
       _count: {
         select: { goals: true }
       }
-    }
+    },
+    orderBy: {
+      goals: {
+        _count: 'desc'
+      }
+    },
+    take: limit * 2 // Buscar mais do que o necessário para garantir que tenhamos suficientes após filtrar
   })
 
-  return playersWithGoals
+  // Mapear para o formato de estatísticas
+  const stats = playersWithGoals
     .map((player: PlayerWithTeamAndGoals): PlayerGoalStats => ({
       player,
       team: player.team,
       goals: player._count.goals
     }))
-    .filter((stat: PlayerGoalStats) => stat.goals > 0)
     .sort((a: PlayerGoalStats, b: PlayerGoalStats) => b.goals - a.goals)
     .slice(0, limit)
+  
+  return stats
 }
 
 export async function getTopAssists(limit: number = 10): Promise<PlayerAssistStats[]> {
+  // Buscar jogadores com contagem de assistências
   const playersWithAssists = await prisma.player.findMany({
     include: {
       team: true,
       _count: {
         select: { assists: true }
       }
-    }
+    },
+    orderBy: {
+      assists: {
+        _count: 'desc'
+      }
+    },
+    take: limit * 2 // Buscar mais do que o necessário para garantir que tenhamos suficientes após filtrar
   })
 
-  return playersWithAssists
+  // Mapear para o formato de estatísticas
+  const stats = playersWithAssists
     .map((player: PlayerWithTeamAndAssists): PlayerAssistStats => ({
       player,
       team: player.team,
       assists: player._count.assists
     }))
-    .filter((stat: PlayerAssistStats) => stat.assists > 0)
     .sort((a: PlayerAssistStats, b: PlayerAssistStats) => b.assists - a.assists)
     .slice(0, limit)
+  
+  return stats
 }
 
 export async function getTopGoalkeepers(limit: number = 10): Promise<GoalkeeperStats[]> {
@@ -137,15 +155,14 @@ export async function getTopGoalkeepers(limit: number = 10): Promise<GoalkeeperS
 
     const cleanSheets = homeCleanSheets + awayCleanSheets
 
-    if (matchesPlayed > 0) {
-      allGoalkeeperStats.push({
-        player: goalkeeper,
-        team: goalkeeper.team,
-        goalsAgainst,
-        cleanSheets,
-        matchesPlayed
-      })
-    }
+    // Adicionar todos os goleiros, mesmo que não tenham jogado partidas
+    allGoalkeeperStats.push({
+      player: goalkeeper,
+      team: goalkeeper.team,
+      goalsAgainst,
+      cleanSheets,
+      matchesPlayed
+    })
   }
 
   // Agrupar por time e selecionar apenas o melhor goleiro de cada time (menor número de gols sofridos)
@@ -159,8 +176,9 @@ export async function getTopGoalkeepers(limit: number = 10): Promise<GoalkeeperS
       bestGoalkeeperByTeam.set(teamId, stat)
     } else {
       // Comparar por menor número de gols sofridos, depois por média de gols por jogo
-      const currentAvg = stat.goalsAgainst / stat.matchesPlayed
-      const existingAvg = existing.goalsAgainst / existing.matchesPlayed
+      // Tratar casos onde matchesPlayed é zero
+      const currentAvg = stat.matchesPlayed > 0 ? stat.goalsAgainst / stat.matchesPlayed : Infinity
+      const existingAvg = existing.matchesPlayed > 0 ? existing.goalsAgainst / existing.matchesPlayed : Infinity
       
       if (stat.goalsAgainst < existing.goalsAgainst || 
           (stat.goalsAgainst === existing.goalsAgainst && currentAvg < existingAvg) ||
@@ -173,6 +191,15 @@ export async function getTopGoalkeepers(limit: number = 10): Promise<GoalkeeperS
   // Converter para array e ordenar por menor número de gols sofridos
   const bestGoalkeepers = Array.from(bestGoalkeeperByTeam.values())
     .sort((a, b) => {
+      // Se nenhum jogou partidas, manter a ordem original
+      if (a.matchesPlayed === 0 && b.matchesPlayed === 0) {
+        return 0
+      }
+      
+      // Priorizar goleiros que jogaram partidas
+      if (a.matchesPlayed === 0) return 1
+      if (b.matchesPlayed === 0) return -1
+      
       // Primeiro critério: menor número total de gols sofridos
       if (a.goalsAgainst !== b.goalsAgainst) {
         return a.goalsAgainst - b.goalsAgainst
@@ -200,10 +227,17 @@ export async function getPlayerCardStats(limit: number = 10): Promise<PlayerCard
           type: true
         }
       }
-    }
+    },
+    orderBy: {
+      cards: {
+        _count: 'desc'
+      }
+    },
+    take: limit * 2 // Buscar mais do que o necessário para garantir que tenhamos suficientes após filtrar
   })
 
-  return playersWithCards
+  // Mapear para o formato de estatísticas
+  const stats = playersWithCards
     .map((player: any): PlayerCardStats => {
       const yellowCards = player.cards.filter((card: any) => card.type === 'YELLOW').length
       const redCards = player.cards.filter((card: any) => card.type === 'RED').length
@@ -217,7 +251,6 @@ export async function getPlayerCardStats(limit: number = 10): Promise<PlayerCard
         totalCards
       }
     })
-    .filter((stat: PlayerCardStats) => stat.totalCards > 0)
     .sort((a: PlayerCardStats, b: PlayerCardStats) => {
       // Primeiro ordenar por cartões vermelhos, depois amarelos, depois total
       if (b.redCards !== a.redCards) return b.redCards - a.redCards
@@ -225,4 +258,6 @@ export async function getPlayerCardStats(limit: number = 10): Promise<PlayerCard
       return b.totalCards - a.totalCards
     })
     .slice(0, limit)
+  
+  return stats
 }
