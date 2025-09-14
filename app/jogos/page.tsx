@@ -296,7 +296,7 @@ export default function MatchesPage() {
                               {goal.assistant && (
                                 <span> (assist: {goal.assistant.name})</span>
                               )}
-                              {goal.minute && <span className="text-gray-400"> - {goal.minute}'</span>}
+                              {goal.minute && <span className="text-gray-400"> - {goal.minute}min'</span>}
                             </div>
                           ))}
                         </div>
