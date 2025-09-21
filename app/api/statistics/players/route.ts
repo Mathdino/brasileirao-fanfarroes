@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getTopScorers, getTopAssists, getTopGoalkeepers } from '@/lib/player-stats'
+import { getTopScorers, getTopAssists, getTopGoalkeepers, getPlayerCardStats } from '@/lib/player-stats'
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,9 +19,13 @@ export async function GET(request: NextRequest) {
       case 'goalkeepers':
         const topGoalkeepers = await getTopGoalkeepers(limit)
         return NextResponse.json(topGoalkeepers)
+        
+      case 'cards':
+        const cardStats = await getPlayerCardStats(limit)
+        return NextResponse.json(cardStats)
       
       default:
-        return NextResponse.json({ error: 'Invalid type parameter. Use: scorers, assists, or goalkeepers' }, { status: 400 })
+        return NextResponse.json({ error: 'Invalid type parameter. Use: scorers, assists, goalkeepers, or cards' }, { status: 400 })
     }
   } catch (error) {
     console.error('Error fetching player statistics:', error)

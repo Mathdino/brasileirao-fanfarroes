@@ -150,6 +150,7 @@ export async function deleteMatch(id: string): Promise<void> {
   
   // Note: Team statistics and rankings will be automatically recalculated
   // on next page load since they are computed from remaining matches
+  // The rankings page has been configured with revalidation to update every 60 seconds
 }
 
 export async function getUpcomingMatches(): Promise<MatchWithTeams[]> {
